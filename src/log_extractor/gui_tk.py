@@ -1,9 +1,9 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from .config_rules import RULES_BY_TYPE
-from .parser import parse_file
-from .excel_writer import rows_to_dataframe, write_excel
+from log_extractor.config_rules import RULES_BY_TYPE
+from log_extractor.parser import parse_file
+from log_extractor.excel_writer import rows_to_dataframe, write_excel
 
 COMPONENTS = ["S1","S2","ISE","R11","R12","R21","R22"]
 

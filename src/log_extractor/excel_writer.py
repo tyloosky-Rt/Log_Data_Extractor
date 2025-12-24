@@ -1,6 +1,6 @@
 from typing import List
 import pandas as pd
-from .parser import ParsedRow
+from log_extractor.parser import ParsedRow
 
 def rows_to_dataframe(rows: List[ParsedRow]) -> pd.DataFrame:
     return pd.DataFrame([{
