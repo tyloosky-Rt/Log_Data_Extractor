@@ -1,0 +1,37 @@
+name: Build Windows EXE
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip uninstall -y typing || echo "typing not installed"
+          pip install pyinstaller
+
+      - name: Build exe
+        run: |
+          pyinstaller --onefile --noconsole .\src\log_extractor\gui_tk.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-data-extractor-windows-exe
+          path: dist/gui_tk.exe
