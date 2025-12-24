@@ -28,7 +28,7 @@ jobs:
 
       - name: Build exe
         run: |
-          pyinstaller --onefile --noconsole .\src\log_extractor\gui_tk.py
+          pyinstaller --onefile --noconsole --paths src .\src\log_extractor\gui_tk.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

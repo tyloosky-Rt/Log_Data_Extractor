@@ -16,3 +16,12 @@ python -m log_extractor.gui_tk
 
 ## 打包（exe）
 见 build/build_exe.md
+
+
+## Development
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install -r requirements.txt
+python -m src.log_extractor.gui_tk

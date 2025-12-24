@@ -1,8 +1,8 @@
 import argparse
 import os
-from .config_rules import RULES_BY_TYPE
-from .parser import parse_file
-from .excel_writer import rows_to_dataframe, write_excel
+from log_extractor.config_rules import RULES_BY_TYPE
+from log_extractor.parser import parse_file
+from log_extractor.excel_writer import rows_to_dataframe, write_excel
 
 def main():
     ap = argparse.ArgumentParser(description="Log Data Extractor")
