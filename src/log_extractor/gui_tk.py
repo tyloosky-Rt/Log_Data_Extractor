@@ -1,11 +1,13 @@
 import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
 from log_extractor.config_rules import RULES_BY_TYPE
 from log_extractor.parser import parse_file
-from log_extractor.excel_writer import rows_to_dataframe, write_excel
+from log_extractor.excel_writer import rows_to_dataframe, write_excel, write_pressure_report
 
-COMPONENTS = ["S1","S2","ISE","R11","R12","R21","R22"]
+COMPONENTS = ["S1", "S2", "ISE", "R11", "R12", "R21", "R22"]
+
 
 class App(tk.Tk):
     def __init__(self):
@@ -58,7 +60,10 @@ class App(tk.Tk):
         note.pack(anchor="w", pady=6)
 
     def pick_files(self):
-        fps = filedialog.askopenfilenames(title="选择log文件", filetypes=[("Log files","*.log"),("All files","*.*")])
+        fps = filedialog.askopenfilenames(
+            title="选择log文件",
+            filetypes=[("Log files", "*.log"), ("All files", "*.*")]
+        )
         self.files.extend(list(fps))
         self._refresh_files()
 
@@ -85,34 +90,59 @@ class App(tk.Tk):
         if not self.files:
             messagebox.showerror("错误", "请先导入日志文件或文件夹。")
             return
+
         comps = [c for c in COMPONENTS if self.comp_vars[c].get()]
         if not comps:
             messagebox.showerror("错误", "请至少勾选一个组件。")
             return
 
         dt = self.data_type.get()
-        rules = RULES_BY_TYPE[dt]
+
+        # liquid 仍走 RULES_BY_TYPE；pressure 虽然目前不依赖 rules/comp，但保持接口一致
+        rules = RULES_BY_TYPE.get(dt, {})
 
         self.status.config(text="处理中...")
         self.update_idletasks()
 
         try:
             for fp in self.files:
+                base = os.path.splitext(os.path.basename(fp))[0]
+                out_dir = os.path.dirname(fp)
+
+                # ✅ Pressure: export ONE excel per log file (3 sheets)
+                if dt == "pressure":
+                    result = parse_file(fp, rules=rules, components=comps, data_type=dt)
+                    out_name = f"{base}_{dt}.xlsx"
+                    out_path = os.path.join(out_dir, out_name)
+                    write_pressure_report(result, out_path)
+                    continue  # ⭐ 关键：不要再走下面 liquid 的 rows_to_dataframe 逻辑
+
+                # ✅ Liquid (original behavior): export per component
                 rows = parse_file(fp, rules=rules, components=comps, data_type=dt)
                 df = rows_to_dataframe(rows)
-                base = os.path.splitext(os.path.basename(fp))[0]
+
                 for comp in comps:
                     out_name = f"{base}_{dt}_{comp}.xlsx"
-                    out_path = os.path.join(os.path.dirname(fp), out_name)
-                    write_excel(df[df["组件"]==comp], out_path)
+                    out_path = os.path.join(out_dir, out_name)
+
+                    # 过滤组件列（兼容 df 没有“组件”列的情况）
+                    if "组件" in df.columns:
+                        write_excel(df[df["组件"] == comp], out_path)
+                    else:
+                        # 如果 df 没有组件列，就直接写全量，避免报错
+                        write_excel(df, out_path)
+
             self.status.config(text="完成")
             messagebox.showinfo("完成", "解析完成，已导出 Excel。")
+
         except Exception as e:
             self.status.config(text="失败")
             messagebox.showerror("失败", str(e))
 
+
 def main():
     App().mainloop()
+
 
 if __name__ == "__main__":
     main()
