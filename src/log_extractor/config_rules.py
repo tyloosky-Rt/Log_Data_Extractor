@@ -7,6 +7,30 @@
   - extracts: dict，key 为字段名，value 为提取表达式（regex 或 'after:<token>'）
   - filters: 可选，支持简单比较（> >= < <= == !=）
 """
+# =========================
+# Pressure rules (V2.2 baseline) - FINAL
+# =========================
+
+# ComponentId mapping for pressure logs
+PRESSURE_COMPONENT_ID = {
+    "S1": 64,
+    "S2": 65,
+    "ISE": 58,
+    "R11": 76,
+    "R12": 77,
+    "R21": 86,
+    "R22": 87,
+}
+
+# Log line patterns for pressure extraction
+PRESSURE_PATTERNS = {
+    "P0P_CLOT": "p0p clot values",
+    "REMAIN_VOL": "calcRemainVolume",
+    "REMAIN_CNT": "calcRemainTestCount",
+}
+
+# Merge window seconds (per V2.2)
+PRESSURE_MERGE_WINDOW_SEC = 1.0
 
 LIQUID_RULES = {
     "S1": [
